@@ -1,9 +1,11 @@
 package com.mmall.service.impl;
 
+import com.mmall.common.Const;
 import com.mmall.common.ServerResponse;
 import com.mmall.dao.UserMapper;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
+import com.mmall.util.MD5Util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +32,8 @@ public class UserServiceImpl implements IUserService {
         }
 
         //todo password login by MD5
-        User user = userMapper.selectLogin(username, password);
+        String md5Password = MD5Util.MD5EncodeUtf8(password);
+        User user = userMapper.selectLogin(username, md5Password);
         if (user == null) {
             return ServerResponse.createByErrorMessage("the password error");
         }
@@ -38,5 +41,28 @@ public class UserServiceImpl implements IUserService {
         user.setPassword(StringUtils.EMPTY);
         return ServerResponse.createBySuccess("login success", user);
 
+    }
+
+    public ServerResponse<String> register(User user) {
+        int resultCount = userMapper.checkUsername(user.getUsername());
+        if (resultCount > 0) {
+            return ServerResponse.createByErrorMessage("the username has exist!");
+        }
+        resultCount = userMapper.checkEmail(user.getEmail());
+        if (resultCount > 0) {
+            return ServerResponse.createByErrorMessage("the email has exist!");
+        }
+        user.setRole(Const.Role.ROLE_CUSTOMER);
+
+        //MD5 encrypt
+        user.setPassword(MD5Util.MD5EncodeUtf8(user.getPassword()));
+
+        resultCount = userMapper.insert(user);
+
+        if (0 == resultCount) {
+            return ServerResponse.createByErrorMessage("register fail");
+        }
+
+        return ServerResponse.createBySuccessMessage("register success");
     }
 }
