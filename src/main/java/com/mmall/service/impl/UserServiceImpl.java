@@ -65,4 +65,26 @@ public class UserServiceImpl implements IUserService {
 
         return ServerResponse.createBySuccessMessage("register success");
     }
+
+
+    public ServerResponse<String> checkValid(String str, String type) {
+        if (org.apache.commons.lang.StringUtils.isNotBlank(type)) {
+            //start check
+            if (Const.USERNAME.equals(type)) {
+                int resultCount = userMapper.checkUsername(str);
+                if (resultCount > 0) {
+                    return ServerResponse.createByErrorMessage("the username has exist!");
+                }
+            }
+            if (Const.EMAIL.equals(type)) {
+                int resultCount = userMapper.checkEmail(str);
+                if (resultCount > 0) {
+                    return ServerResponse.createByErrorMessage("the emial has exist!");
+                }
+            }
+        } else {
+            return ServerResponse.createByErrorMessage("the param is error");
+        }
+        return ServerResponse.createBySuccessMessage("check success");
+    }
 }
