@@ -10,8 +10,13 @@ package com.mmall.common;
 public class Const {
     public static final String CURRENT_USER = "currentUser";
 
+    public static final String EMAIL = "emial";
+    public static final String USERNAME = "username";
+
+
     public interface Role {
         int ROLE_CUSTOMER = 0;//customer
         int ROLE_ADMIN = 1;//admin
     }
+
 }
