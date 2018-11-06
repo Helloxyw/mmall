@@ -4,6 +4,7 @@ import com.mmall.common.Const;
 import com.mmall.common.ServerResponse;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,5 +69,46 @@ public class UserController {
     @ResponseBody
     public ServerResponse<String> register(User user) {
         return iUserService.register(user);
+    }
+
+    /**
+     * checkValid
+     *
+     * @param str
+     * @param type
+     * @return
+     */
+    @RequestMapping(value = "check_valid.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServerResponse<String> checkValid(String str, String type) {
+        return iUserService.checkValid(str, type);
+    }
+
+    /**
+     * getUserInfo
+     *
+     * @param session
+     * @return
+     */
+    @RequestMapping(value = "get_user_info.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServerResponse<User> getUserInfo(HttpSession session) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user != null) {
+            return ServerResponse.createBySuccess(user);
+        }
+
+        return ServerResponse.createByErrorMessage("the user hasn't login,cannot " +
+                "get the current userInfo");
+    }
+
+    @RequestMapping(value = "forget_get_question.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServerResponse<String> forgetGetQuestion(String username) {
+        return iUserService.selectQuestion(username);
+    }
+
+    public ServerResponse<String> forgetCheckAnswer(String username, String question, String answer) {
+        return null;
     }
 }

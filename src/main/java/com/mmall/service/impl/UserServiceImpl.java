@@ -10,6 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 /**
  * @ClassName UserServiceImpl
  * @Description TODO
@@ -44,20 +46,23 @@ public class UserServiceImpl implements IUserService {
     }
 
     public ServerResponse<String> register(User user) {
-        int resultCount = userMapper.checkUsername(user.getUsername());
-        if (resultCount > 0) {
-            return ServerResponse.createByErrorMessage("the username has exist!");
+
+        ServerResponse validResponse = this.checkValid(user.getUsername(), Const.USERNAME);
+        if (!validResponse.isSuccess()) {
+            return validResponse;
         }
-        resultCount = userMapper.checkEmail(user.getEmail());
-        if (resultCount > 0) {
-            return ServerResponse.createByErrorMessage("the email has exist!");
+
+        validResponse = this.checkValid(user.getEmail(), Const.EMAIL);
+
+        if (!validResponse.isSuccess()) {
+            return validResponse;
         }
         user.setRole(Const.Role.ROLE_CUSTOMER);
 
         //MD5 encrypt
         user.setPassword(MD5Util.MD5EncodeUtf8(user.getPassword()));
 
-        resultCount = userMapper.insert(user);
+        int resultCount = userMapper.insert(user);
 
         if (0 == resultCount) {
             return ServerResponse.createByErrorMessage("register fail");
@@ -86,5 +91,30 @@ public class UserServiceImpl implements IUserService {
             return ServerResponse.createByErrorMessage("the param is error");
         }
         return ServerResponse.createBySuccessMessage("check success");
+    }
+
+    public ServerResponse<String> selectQuestion(String username) {
+        ServerResponse validResponse = this.checkValid(username, Const.USERNAME);
+        if (validResponse.isSuccess()) {
+            //the user isn't exist
+            return ServerResponse.createByErrorMessage("the user is not exist");
+        }
+
+        String question = userMapper.selectQuestionByUsername(username);
+        if (StringUtils.isNotBlank(question)) {
+            return ServerResponse.createBySuccess(question);
+        }
+
+        return ServerResponse.createByErrorMessage("the select question is empty");
+    }
+
+    public ServerResponse<String> checkAnswer(String username, String question, String answer) {
+        int resultCount = userMapper.checkAnswer(username, question, answer);
+        if (resultCount > 0) {
+            //means the qestion and the answer belong to user and they are correct
+            String forgetToken = UUID.randomUUID().toString();
+
+        }
+        return null;
     }
 }

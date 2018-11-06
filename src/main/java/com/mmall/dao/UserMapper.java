@@ -23,13 +23,29 @@ public interface UserMapper {
 
     /**
      * check the email
+     *
      * @param email
      * @return
      */
     int checkEmail(String email);
 
     /**
-     * check login
+     * checkLogin
+     *
+     * @param username
+     * @param password
+     * @return
      */
     User selectLogin(@Param("username") String username, @Param("password") String password);
+
+    /**
+     * select question by username
+     *
+     * @param username
+     * @return
+     */
+    String selectQuestionByUsername(String username);
+
+    int checkAnswer(@Param("username") String username, @Param("question") String question,
+                    @Param("answer") String answer);
 }
