@@ -46,6 +46,26 @@ public interface UserMapper {
      */
     String selectQuestionByUsername(String username);
 
+    /**
+     * check the answer
+     *
+     * @param username
+     * @param question
+     * @param answer
+     * @return
+     */
     int checkAnswer(@Param("username") String username, @Param("question") String question,
                     @Param("answer") String answer);
+
+    /**
+     * update password
+     *
+     * @param username
+     * @param passwordNew
+     * @return
+     */
+    int updatePasswordByUsername(@Param("username") String username, @Param("passwordNew") String passwordNew);
+
+
+    int checkPassword(@Param("password") String password, @Param("userId") Integer userId);
 }

@@ -2,7 +2,6 @@ package com.mmall.service;
 
 import com.mmall.common.ServerResponse;
 import com.mmall.pojo.User;
-import org.apache.ibatis.annotations.Param;
 
 /**
  * created by RicardoXu
@@ -17,6 +16,9 @@ public interface IUserService {
 
     ServerResponse<String> selectQuestion(String username);
 
-    ServerResponse<String> checkAnswer(@Param("username") String username, @Param("question") String question,
-                                       @Param("answer") String answer);
+    ServerResponse<String> checkAnswer(String username, String question, String answer);
+
+    ServerResponse<String> forgetResetPassword(String username, String passwordNew, String forgetToken);
+
+    ServerResponse<String> resetPassword(String passwordOld, String passwordNew, User user);
 }

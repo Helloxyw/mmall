@@ -2,6 +2,7 @@ package com.mmall.service.impl;
 
 import com.mmall.common.Const;
 import com.mmall.common.ServerResponse;
+import com.mmall.common.TokenCache;
 import com.mmall.dao.UserMapper;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
@@ -113,8 +114,44 @@ public class UserServiceImpl implements IUserService {
         if (resultCount > 0) {
             //means the qestion and the answer belong to user and they are correct
             String forgetToken = UUID.randomUUID().toString();
-
+            TokenCache.setKey(TokenCache.TOKEN_PREFIX + username, forgetToken);
+            return ServerResponse.createBySuccess(forgetToken);
         }
+        return ServerResponse.createByErrorMessage("the answer is wrong");
+    }
+
+    public ServerResponse<String> forgetResetPassword(String username, String passwordNew, String forgetToken) {
+        if (StringUtils.isBlank(forgetToken)) {
+            return ServerResponse.createByErrorMessage("the param is wrong,token need delive");
+        }
+        ServerResponse validResponse = this.checkValid(username, Const.USERNAME);
+        if (validResponse.isSuccess()) {
+            //the user isn't exist
+            return ServerResponse.createByErrorMessage("the user is not exist");
+        }
+        String token = TokenCache.getKey(TokenCache.TOKEN_PREFIX + username);
+        if (StringUtils.isBlank(token)) {
+            return ServerResponse.createByErrorMessage("token is invalid or out of date");
+        }
+
+        if (StringUtils.equals(forgetToken, token)) {
+            String md5Password = MD5Util.MD5EncodeUtf8(passwordNew);
+            int rowCount = userMapper.updatePasswordByUsername(username, md5Password);
+
+            if (rowCount > 0) {
+                return ServerResponse.createBySuccessMessage("update password success");
+            }
+        } else {
+            return ServerResponse.createByErrorMessage("token is wrong,please get the token again");
+        }
+
+        return ServerResponse.createByErrorMessage("update password fail");
+    }
+
+
+    public ServerResponse<String> resetPassword(String passwordOld, String passwordNew, User user) {
+
+        int resuleCount = userMapper.checkPassword(MD5Util.MD5EncodeUtf8(passwordOld), user.getId());
         return null;
     }
 }
