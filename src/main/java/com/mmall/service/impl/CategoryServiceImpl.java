@@ -1,5 +1,7 @@
 package com.mmall.service.impl;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.mmall.common.ServerResponse;
 import com.mmall.dao.CategoryMapper;
 import com.mmall.pojo.Category;
@@ -82,8 +84,22 @@ public class CategoryServiceImpl implements ICategoryService {
         return ServerResponse.createBySuccess(categoryList);
     }
 
+    /**
+     * recursive query category and children
+     * @param categoryId
+     * @return
+     */
     public ServerResponse selectCategoryAndChildrenById(Integer categoryId) {
-        return null;
+        Set<Category> categorySet = Sets.newHashSet();
+        findChildCategory(categorySet, categoryId);
+
+        List<Integer> categoryIdList = Lists.newArrayList();
+        if (categoryId != null) {
+            for (Category categoryItem : categorySet) {
+                categoryIdList.add(categoryItem.getId());
+            }
+        }
+        return ServerResponse.createBySuccess(categoryIdList);
     }
 
     //recursive ,calculate child node
@@ -94,6 +110,9 @@ public class CategoryServiceImpl implements ICategoryService {
         }
         //find child node, must have a quit
         List<Category> categoryList = categoryMapper.selectCategoryChildrenByParentId(categoryId);
-        return null;
+        for (Category categoryItem : categoryList) {
+            findChildCategory(categorySet, categoryItem.getId());
+        }
+        return categorySet;
     }
 }

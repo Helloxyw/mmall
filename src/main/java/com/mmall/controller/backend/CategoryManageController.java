@@ -86,5 +86,21 @@ public class CategoryManageController {
         }
     }
 
-    public ServerResponse
+    @RequestMapping("get_deep_category.do")
+    @ResponseBody
+    public ServerResponse getCategoryAndDeepChildrenCategory(HttpSession session,
+                                                             @RequestParam(value = "categoryId", defaultValue = "0") Integer categoryId) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),
+                    "the user is not inline,need login ");
+        }
+        if (iUserService.checkAdminRole(user).isSuccess()) {
+            //find current id and recursive child category id
+            // 0->1000->100000
+            return iCategoryService.selectCategoryAndChildrenById(categoryId);
+        } else {
+            return ServerResponse.createByErrorMessage("no authority to operate, requiring administrator privileges");
+        }
+    }
 }
