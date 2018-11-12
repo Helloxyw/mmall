@@ -154,4 +154,56 @@ public class UserServiceImpl implements IUserService {
         int resuleCount = userMapper.checkPassword(MD5Util.MD5EncodeUtf8(passwordOld), user.getId());
         return null;
     }
+
+
+    public ServerResponse<User> updateInformation(User user) {
+        //username cannot be updated
+        //emial need a check to ensure  if the new email exist, and new email
+        //has exist ,it cannot belong to current user
+
+        int resultCount = userMapper.checkEmailByUserId(user.getEmail(), user.getId());
+        if (resultCount > 0) {
+            return ServerResponse.createByErrorMessage("the email has exist,please change" +
+                    "the new email and try again");
+        }
+        User updateUser = new User();
+        updateUser.setId(user.getId());
+        updateUser.setEmail(user.getEmail());
+        updateUser.setPhone(user.getPhone());
+        updateUser.setQuestion(user.getQuestion());
+        updateUser.setAnswer(user.getAnswer());
+
+        int updateCount = userMapper.updateByPrimaryKeySelective(updateUser);
+        if (updateCount > 0) {
+            return ServerResponse.createBySuccess("update user information success", updateUser);
+        }
+        return ServerResponse.createByErrorMessage("update user information failed");
+    }
+
+
+    public ServerResponse<User> getInformation(Integer id) {
+        User user = userMapper.selectByPrimaryKey(id);
+        if (user == null) {
+            return ServerResponse.createByErrorMessage("can not find the user");
+        }
+
+        //hide password
+        user.setPassword(StringUtils.EMPTY);
+        return ServerResponse.createBySuccess(user);
+    }
+
+    //backend
+
+    /**
+     * check is Admin
+     *
+     * @param user
+     * @return
+     */
+    public ServerResponse checkAdminRole(User user) {
+        if (user != null && user.getRole().intValue() == Const.Role.ROLE_ADMIN) {
+            return ServerResponse.createBySuccess();
+        }
+        return ServerResponse.createByError();
+    }
 }
